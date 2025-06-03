@@ -1,0 +1,45 @@
+server:
+  port: 8088
+
+routes:
+  auth: http://localhost:8080
+  user: http://localhost:8081
+  event: http://localhost:8082
+  ticket: http://localhost:8083
+  booking: http://localhost:8084
+  payment: http://localhost:8085
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-route
+          uri: ${routes.auth}
+          predicates:
+            - Path=/api/auth/**
+        - id: user-route
+          uri: ${routes.user}
+          predicates:
+            - Path=/api/users/**
+        - id: event-route
+          uri: ${routes.event}
+          predicates:
+            - Path=/api/events/**
+        - id: ticket-route
+          uri: ${routes.ticket}
+          predicates:
+            - Path=/api/tickets/**
+        - id: booking-route
+          uri: ${routes.booking}
+          predicates:
+            - Path=/api/bookings/**
+        - id: payment-route
+          uri: ${routes.payment}
+          predicates:
+            - Path=/api/payments/**
+
+
