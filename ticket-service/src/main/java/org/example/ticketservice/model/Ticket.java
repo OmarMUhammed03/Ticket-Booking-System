@@ -6,6 +6,7 @@ import org.example.bookingservice.model.Booking;
 import org.example.eventservice.model.Event;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -14,8 +15,6 @@ import java.util.UUID;
 public class Ticket {
     @Id
     private UUID ticketId;
-    @Column(unique = true)
-    private String ticketCode;
     @Column(nullable = false)
     private BigDecimal price;
     private TicketType ticketType;
@@ -24,6 +23,8 @@ public class Ticket {
     private Event event;
     @OneToOne(mappedBy = "ticket", fetch = FetchType.LAZY)
     private Booking booking;
+    private TicketStatus ticketStatus;
+    private LocalDateTime expirationDate;
     private String seatNumber;
 }
 
