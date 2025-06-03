@@ -31,6 +31,7 @@ public class Booking {
     private Ticket ticket;
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Payment payment;
+    private BookingStatus bookingStatus;
     private LocalDateTime bookingDate;
     @Lob
     private String bookingDetail;
