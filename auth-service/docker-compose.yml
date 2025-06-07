@@ -1,0 +1,27 @@
+services:
+  auth-service:
+    build: .
+    container_name: auth-service
+    ports:
+      - "8080:8080"
+    env_file:
+      - secret.env
+    depends_on:
+      - auth_db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth_db:5432/authDB
+
+  auth_db:
+    image: postgres:14.1-alpine
+    container_name: auth_db
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: postgres
+      POSTGRES_DB: authDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+
+volumes:
+  auth_db_data:
