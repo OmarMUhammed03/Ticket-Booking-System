@@ -15,7 +15,6 @@ import org.example.authservice.model.RefreshToken;
 import org.example.authservice.repository.AuthUserRepository;
 import org.example.authservice.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
 
@@ -38,7 +37,6 @@ public class JwtService {
     private Long jwtExpiresMinutes;
 
     private static final Integer ACCESS_TOKEN_EXPIRATION_TIME = 60 * 1000;
-    private static final Integer ACCESS_TOKEN_COOKIE_EXPIRATION_TIME = 60 * 30;
     private static final TemporalAmount REFRESH_TOKEN_EXPIRATION_TIME =
             java.time.Duration.ofDays(10);
     private static final Integer REFRESH_TOKEN_COOKIE_EXPIRATION_TIME =
