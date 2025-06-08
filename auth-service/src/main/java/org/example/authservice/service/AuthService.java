@@ -5,18 +5,20 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.authservice.dto.CustomUserDetails;
 import org.example.authservice.dto.LoginRequest;
+import org.example.authservice.dto.LoginResponse;
 import org.example.authservice.dto.SignupRequest;
 import org.example.authservice.exception.InvalidActionException;
 import org.example.authservice.exception.ValidationException;
 import org.example.authservice.model.AuthUser;
 import org.example.authservice.model.ROLE;
 import org.example.authservice.repository.AuthUserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +39,7 @@ public class AuthService {
             ROLE.ORGANIZER.toString()
     };
 
-    public String login(final LoginRequest loginRequest,
-                        final HttpServletResponse response) {
+    public LoginResponse login(final LoginRequest loginRequest) {
         checkUserLoggedIn("User already logged in.");
 
         Authentication authenticationRequest =
@@ -49,14 +50,10 @@ public class AuthService {
         Authentication authenticationResponse =
                 this.authenticationManager.authenticate(authenticationRequest);
 
-        SecurityContextHolder.getContext().
-                setAuthentication(authenticationResponse);
-        tokenService.generateToken(loginRequest.getEmail(), response);
-        tokenService.generateRefreshToken(loginRequest.getEmail(), response);
-        UserDetails userDetails =
-                (UserDetails) authenticationResponse.getPrincipal();
-
-        return userDetails.getUsername();
+        SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
+        String accessToken = tokenService.generateToken(loginRequest.getEmail());
+        String refreshToken = tokenService.generateRefreshToken(loginRequest.getEmail());
+        return new LoginResponse(accessToken, refreshToken);
     }
 
     public void registerAccount(final SignupRequest signupRequest) {
@@ -81,10 +78,24 @@ public class AuthService {
         authUserRepository.save(user);
     }
 
-    public void logoutUser(
-            final HttpServletResponse response) {
+    private String getCookieValue(HttpServletRequest request, String cookieName) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+        for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals(cookieName)) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    public void logoutUser(final HttpServletRequest request, final HttpServletResponse response) {
+        String accessToken = getCookieValue(request, "accessToken");
+        checkNotNullAccessDeniedException(accessToken,
+                "Access token cannot be found.");
         tokenService.removeAccessTokenFromCookie(response);
-        tokenService.removeRefreshTokenFromCookieAndExpire(response);
+        tokenService.removeRefreshTokenFromCookieAndExpire(response, accessToken);
     }
 
     public String refreshToken(final HttpServletRequest request,
@@ -96,7 +107,7 @@ public class AuthService {
                     "Refresh token cannot be found.");
             String email =
                     tokenService.renewRefreshToken(refreshToken, response);
-            tokenService.generateToken(email, response);
+            tokenService.generateToken(email);
             return email;
         } catch (IllegalArgumentException e) {
             throw new AccessDeniedException("Invalid refresh token.");
@@ -105,8 +116,7 @@ public class AuthService {
 
     public void addUserDetailsInHeader(
             final HttpServletResponse response) {
-
-        CustomUserDetails userDetails = getCurrentUserDetails();
+        AuthUser userDetails = getCurrentUserDetails();
         String email = userDetails.getUsername();
         StringBuilder roles = new StringBuilder();
         userDetails.getAuthorities().forEach((authority) -> {
@@ -129,12 +139,12 @@ public class AuthService {
         response.setHeader("X-User-Id", id);
     }
 
-    public static CustomUserDetails getCurrentUserDetails() {
+    public static AuthUser getCurrentUserDetails() {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomUserDetails) {
-            return (CustomUserDetails) principal;
+        if (principal instanceof AuthUser) {
+            return (AuthUser) principal;
         } else {
             throw new InvalidActionException(
                     "User details not saved correctly.");
