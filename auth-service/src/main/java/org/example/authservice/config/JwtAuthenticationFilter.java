@@ -1,5 +1,6 @@
 package org.example.authservice.config;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwt = authHeader.substring(7);
-        jwtService.validateAccessToken(jwt);
-        String email = jwtService.extractEmail();
+        Claims claims = jwtService.validateAccessToken(jwt);
+        String email = jwtService.extractEmail(claims);
         if (email != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
