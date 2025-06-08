@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.authservice.dto.LoginRequest;
+import org.example.authservice.dto.LoginResponse;
 import org.example.authservice.dto.SignupRequest;
 import org.example.authservice.service.AuthService;
 import org.slf4j.Logger;
@@ -23,14 +24,14 @@ public class AuthController {
             LoggerFactory.getLogger(AuthController.class);
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(
+    public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody final LoginRequest loginRequest,
             final HttpServletResponse response) {
-        String username = authenticationService.login(loginRequest, response);
-        LOGGER.info("User {} logged in", username);
-        return new ResponseEntity<>(
-                "User " + username + " logged in successfully",
-                HttpStatus.OK);
+        LoginResponse tokens = authenticationService.login(loginRequest);
+        LOGGER.info("User {} logged in", loginRequest.getEmail());
+        response.setHeader("Authorization", "Bearer " + tokens.getAccessToken());
+        response.setHeader("X-Refresh-Token", tokens.getRefreshToken());
+        return ResponseEntity.ok(tokens);
     }
 
     @PostMapping("/register")
@@ -43,8 +44,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser(final HttpServletResponse response) {
-            authenticationService.logoutUser(response);
+    public ResponseEntity<?> logoutUser(final HttpServletRequest request, final HttpServletResponse response) {
+        authenticationService.logoutUser(request, response);
         return new ResponseEntity<>("You've been signed out!", HttpStatus.OK);
     }
 
@@ -61,9 +62,12 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public void addUserDetailsInHeader(final HttpServletResponse response) {
+    public ResponseEntity<?> addUserDetailsInHeader(final HttpServletResponse response) {
+        LOGGER.info("Fetching current user details");
         authenticationService.addUserDetailsInHeader(response);
         LOGGER.info("Fetching current user details and adding to header");
+        return new ResponseEntity<>(
+                "User details added to header",
+                HttpStatus.OK);
     }
 }
-
