@@ -1,5 +1,8 @@
 package org.example.userservice.service;
 
+import org.example.userservice.dto.CreateUserDto;
+import org.example.userservice.dto.UserResponseDto;
+import org.example.userservice.mapper.UserMapper;
 import org.example.userservice.model.User;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -16,27 +19,33 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toUserCreatedDto)
+                .toList();
     }
 
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public Optional<UserResponseDto> createUser(CreateUserDto createUserDto) {
+        User user = UserMapper.toUser(createUserDto);
+        if (!user.isValid()) {
+            return Optional.empty();
+        }
+        userRepository.save(user);
+        return Optional.of(UserMapper.toUserCreatedDto(user));
     }
 
-    public Optional<User> getUserById(UUID userId) {
-        return userRepository.findById(userId);
+    public Optional<UserResponseDto> getUserById(UUID userId) {
+        return userRepository.findById(userId)
+                .map(UserMapper::toUserCreatedDto);
     }
 
-    public Optional<User> deleteUser(UUID userId) {
+    public Optional<UserResponseDto> deleteUser(UUID userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
             userRepository.deleteById(userId);
-            return user;
+            return user.map(UserMapper::toUserCreatedDto);
         }
         return Optional.empty();
     }
 
 }
-
-
