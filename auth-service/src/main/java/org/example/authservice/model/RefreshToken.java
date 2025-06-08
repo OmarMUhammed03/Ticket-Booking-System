@@ -20,9 +20,6 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
-    private String token;
-
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 

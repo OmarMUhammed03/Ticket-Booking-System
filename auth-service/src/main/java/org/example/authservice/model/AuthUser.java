@@ -19,9 +19,8 @@ import java.util.*;
 @AllArgsConstructor
 public class AuthUser implements UserDetails {
     @Id
+    @GeneratedValue
     private UUID id;
-    @Column(unique = true, nullable = false)
-    private String username;
     @Column(unique = true)
     private String email;
     @Column(nullable = false)
@@ -33,26 +32,6 @@ public class AuthUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 
     @Override
