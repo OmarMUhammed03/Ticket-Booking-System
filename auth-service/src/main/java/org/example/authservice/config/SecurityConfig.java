@@ -3,6 +3,9 @@ package org.example.authservice.config;
 import lombok.RequiredArgsConstructor;
 import org.example.authservice.exception.NotFoundException;
 import org.example.authservice.repository.AuthUserRepository;
+import org.example.authservice.service.AuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,7 +27,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final AuthUserRepository repository;
-
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(SecurityConfig.class);
     @Bean
     public org.springframework.security.core.userdetails.UserDetailsService userDetailsService() {
         return new org.springframework.security.core.userdetails.UserDetailsService() {
@@ -37,7 +41,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
+            throws Exception {
+        LOGGER.info("Configuring security filter chain");
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter,
@@ -54,7 +60,7 @@ public class SecurityConfig {
                                         "/auth/refresh-token")
                                 .permitAll()
                                 .requestMatchers("/admin/**")
-                                .hasAuthority("ROLE_ADMIN")
+                                .hasAuthority("ADMIN")
                                 .requestMatchers("/swagger-ui/**",
                                         "/v3/api-docs/**")
                                 .permitAll()

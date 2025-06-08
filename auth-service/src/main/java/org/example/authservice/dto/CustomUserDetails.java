@@ -35,10 +35,6 @@ public class CustomUserDetails implements UserDetails {
     private final boolean credentialsNonExpired;
     private final boolean enabled;
 
-    public void eraseCredentials() {
-        this.password = null;
-    }
-
     public int hashCode() {
         return this.username.hashCode();
     }
