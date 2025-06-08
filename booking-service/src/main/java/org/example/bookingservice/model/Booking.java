@@ -2,10 +2,6 @@ package org.example.bookingservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.example.eventservice.model.Event;
-import org.example.paymentservice.model.Payment;
-import org.example.ticketservice.model.Ticket;
-import org.example.userservice.model.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,19 +14,14 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID bookingId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private UUID userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eventId", nullable = false)
-    private Event event;
+    @Column(nullable = false)
+    private UUID eventId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_id", nullable = false, unique = true)
-    private Ticket ticket;
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Payment payment;
+    @Column(nullable = false)
+    private UUID ticketId;
     private BookingStatus bookingStatus;
     private LocalDateTime bookingDate;
     @Lob
