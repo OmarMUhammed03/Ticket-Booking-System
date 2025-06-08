@@ -47,29 +47,20 @@ public class JwtService {
             "/api/auth/refresh-token";
     private static final String ACCESS_TOKEN_COOKIE_PATH = "/";
 
-    private Claims claims;
-
-    public String extractEmail() {
+    public String extractEmail(Claims claims) {
         return claims.getSubject();
     }
 
-    public void generateToken(String username, final HttpServletResponse response) {
-        String jwt = Jwts.builder()
+    public String generateToken(String username) {
+        return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiresMinutes * ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(getSignInKey())
                 .compact();
-        Cookie cookie = new Cookie("accessToken", jwt);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath(ACCESS_TOKEN_COOKIE_PATH);
-        cookie.setMaxAge(ACCESS_TOKEN_COOKIE_EXPIRATION_TIME);
-        response.addCookie(cookie);
     }
 
-    public void generateRefreshToken(final String email,
-                                     final HttpServletResponse response) {
+    public String generateRefreshToken(final String email) {
         AuthUser user = authUserRepository.findByEmail(email)
                 .orElseThrow(() -> new ValidationException("User not found"));
         RefreshToken userRefreshToken =
@@ -86,13 +77,12 @@ public class JwtService {
             refreshTokenRepository.save(userRefreshToken);
         }
 
-        String refreshTokenString = userRefreshToken.getId().toString();
-        addRefreshTokenToCookie(refreshTokenString, response);
+        return userRefreshToken.getId().toString();
     }
 
-    public void validateAccessToken(final String token) {
+    public Claims validateAccessToken(final String token) {
         try {
-            claims = Jwts.parser()
+            return Jwts.parser()
                     .verifyWith(getSignInKey())
                     .build()
                     .parseSignedClaims(token)
@@ -156,8 +146,9 @@ public class JwtService {
     }
 
     public void removeRefreshTokenFromCookieAndExpire(
-            final HttpServletResponse response) {
-        String userEmail = extractEmail();
+            final HttpServletResponse response, String token) {
+        Claims claims = validateAccessToken(token);
+        String userEmail = extractEmail(claims);
         AuthUser user =
                 authUserRepository.findByEmail(userEmail)
                         .orElseThrow(() -> new ValidationException(
@@ -186,7 +177,7 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, String email) {
-        final String tokenEmail = extractEmail();
+        final String tokenEmail = extractEmail(validateAccessToken(token));
         return (tokenEmail.equals(email)) && !isTokenExpired(token);
     }
 
@@ -195,6 +186,6 @@ public class JwtService {
     }
 
     private Date extractExpiration(String token) {
-        return claims.getExpiration();
+        return validateAccessToken(token).getExpiration();
     }
 }
