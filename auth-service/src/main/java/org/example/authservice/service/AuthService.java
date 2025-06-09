@@ -11,7 +11,6 @@ import org.example.commonexception.ValidationException;
 import org.example.authservice.model.AuthUser;
 import org.example.authservice.model.ROLE;
 import org.example.authservice.repository.AuthUserRepository;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -107,7 +106,7 @@ public class AuthService {
             tokenService.generateToken(email);
             return email;
         } catch (IllegalArgumentException e) {
-            throw new AccessDeniedException("Invalid refresh token.");
+            throw new ValidationException("Invalid refresh token.");
         }
     }
 
@@ -158,7 +157,7 @@ public class AuthService {
     private void checkNotNullAccessDeniedException(final Object value,
                                                    final String message) {
         if (value == null) {
-            throw new AccessDeniedException(message);
+            throw new ValidationException(message);
         }
     }
 }
