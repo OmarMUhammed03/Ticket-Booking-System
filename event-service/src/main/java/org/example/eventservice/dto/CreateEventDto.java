@@ -24,9 +24,6 @@ public class CreateEventDto {
 
     private String description;
 
-    @NotNull(message = "Creator ID is required")
-    private UUID creatorId;
-
     @NotNull(message = "Venue ID is required")
-    private Long venueId;
+    private UUID venueId;
 }

@@ -23,7 +23,7 @@ public class EventResponseDto {
 
     @Data
     public static class VenueDto {
-        private Long venueId;
+        private UUID venueId;
         private String name;
         private String address;
         private String city;
@@ -38,7 +38,7 @@ public class EventResponseDto {
     @Data
     public static class TicketResponseDto {
         private UUID ticketId;
-        private BigDecimal price;
+        private Double price;
         private String ticketType;
         private String ticketStatus;
         private LocalDateTime expirationDate;
