@@ -5,9 +5,8 @@ routes:
   auth: http://localhost:8080
   user: http://localhost:8081
   event: http://localhost:8082
-  ticket: http://localhost:8083
-  booking: http://localhost:8084
-  payment: http://localhost:8085
+  booking: http://localhost:8083
+  payment: http://localhost:8084
 
 spring:
   main:
@@ -29,10 +28,10 @@ spring:
           uri: ${routes.event}
           predicates:
             - Path=/api/events/**
-        - id: ticket-route
-          uri: ${routes.ticket}
+        - id: venue-route
+          uri: ${routes.event}
           predicates:
-            - Path=/api/tickets/**
+            - Path=/api/venues/**
         - id: booking-route
           uri: ${routes.booking}
           predicates:
