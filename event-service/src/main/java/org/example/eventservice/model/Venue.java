@@ -49,8 +49,6 @@ public class Venue {
     @Column(nullable = false)
     private String country;
 
-    private Integer capacity;
-
     @Size(max = 25)
     private String contactPhone;
 

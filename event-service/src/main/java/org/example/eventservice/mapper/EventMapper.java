@@ -31,7 +31,6 @@ public class EventMapper {
         venueDto.setState(v.getState());
         venueDto.setPostalCode(v.getPostalCode());
         venueDto.setCountry(v.getCountry());
-        venueDto.setCapacity(v.getCapacity());
         venueDto.setContactPhone(v.getContactPhone());
         venueDto.setContactEmail(v.getContactEmail());
         dto.setVenue(venueDto);
