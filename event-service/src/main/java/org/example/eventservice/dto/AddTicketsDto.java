@@ -6,8 +6,6 @@ import lombok.Data;
 
 @Data
 public class AddTicketsDto {
-    @NotNull(message = "Event ID cannot be null")
-    private Long eventId;
     @NotNull(message = "Quantity cannot be null")
     private Integer quantity;
     @NotNull(message = "Ticket type cannot be null")
