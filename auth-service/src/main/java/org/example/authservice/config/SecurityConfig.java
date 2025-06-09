@@ -1,7 +1,7 @@
 package org.example.authservice.config;
 
+import org.example.commonexception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.example.authservice.exception.NotFoundException;
 import org.example.authservice.repository.AuthUserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
