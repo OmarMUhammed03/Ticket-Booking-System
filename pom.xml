@@ -7,7 +7,8 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version>
-        <relativePath/> </parent>
+        <relativePath/>
+    </parent>
 
     <groupId>org.example</groupId>
     <artifactId>ticket-booking-system</artifactId>
@@ -17,7 +18,8 @@
     <description>Parent project for the Ticket Booking System</description>
 
     <properties>
-        <java.version>17</java.version> <maven.compiler.source>${java.version}</maven.compiler.source>
+        <java.version>23</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <jjwt.version>0.12.6</jjwt.version>
     </properties>
@@ -25,17 +27,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>6.1.14</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>6.4.4</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>6.1.14</version>
         </dependency>
     </dependencies>
 
