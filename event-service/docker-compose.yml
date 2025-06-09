@@ -1,0 +1,25 @@
+services:
+  event-service:
+    build: .
+    container_name: event-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - event_db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://event_db:5432/eventDB
+
+  event_db:
+    image: postgres:14.1-alpine
+    container_name: event_db
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: postgres
+      POSTGRES_DB: eventDB
+    ports:
+      - "5434:5432"
+    volumes:
+      - event_db_data:/var/lib/postgresql/data
+
+volumes:
+  event_db_data:
