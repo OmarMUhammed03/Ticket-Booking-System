@@ -17,7 +17,6 @@ public class VenueResponseDto {
     private String state;
     private String postalCode;
     private String country;
-    private Integer capacity;
     private String contactPhone;
     private String contactEmail;
 }
