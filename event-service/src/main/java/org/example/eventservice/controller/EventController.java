@@ -71,4 +71,16 @@ public class EventController {
         return tickets.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PatchMapping("/{id}/tickets/{ticketId}")
+    public ResponseEntity<?> reserveEventTicket(@PathVariable("id") UUID eventId,
+                                                @PathVariable("ticketId") UUID ticketId,
+                                                @RequestHeader("X-User-Id") String userId) {
+        LOGGER.info("Updating ticket with ID: {} for event with ID: {}", ticketId, eventId);
+        Optional<String> updatedTicket =
+                eventService.reserveEventTicket(eventId, ticketId, userId);
+        return updatedTicket.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 }

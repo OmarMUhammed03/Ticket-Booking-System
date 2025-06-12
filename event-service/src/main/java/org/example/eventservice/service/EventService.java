@@ -7,13 +7,16 @@ import org.example.commonexception.ValidationException;
 import org.example.eventservice.dto.AddTicketsDto;
 import org.example.eventservice.dto.CreateEventDto;
 import org.example.eventservice.dto.EventResponseDto;
+import org.example.eventservice.kafka.MessageProducer;
 import org.example.eventservice.model.*;
 import org.example.eventservice.mapper.EventMapper;
 import org.example.eventservice.repository.EventRepository;
 import org.example.eventservice.repository.TicketRepository;
 import org.example.eventservice.repository.VenueRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +27,10 @@ public class EventService {
     private final EventRepository eventRepository;
     private final TicketRepository ticketRepository;
     private final VenueRepository venueRepository;
+    private final MessageProducer messageProducer;
+
+    @Value("${ticket.expiration.duration.minutes}")
+    private Integer ticketExpirationDurationMinutes;
 
     public List<EventResponseDto> getAllEvents() {
         return eventRepository.findAll().stream()
@@ -103,9 +110,37 @@ public class EventService {
         }
         Event event = eventOptional.get();
         List<EventResponseDto.TicketResponseDto> ticketDtos = event.getTickets()
-                .stream()
+                .stream().filter(t -> (t.getTicketStatus() == TicketStatus.AVAILABLE ||
+                        (t.getTicketStatus() == TicketStatus.RESERVED && t.getExpirationDate() != null
+                                && t.getExpirationDate().isAfter(LocalDateTime.now()))))
                 .map(EventMapper::mapTicketToDto)
                 .toList();
         return Optional.of(ticketDtos);
+    }
+
+    public Optional<String> reserveEventTicket(UUID eventId, UUID ticketId, String userId) {
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isEmpty()) {
+            throw new NotFoundException("Event Not Found");
+        }
+        Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
+        if (ticketOptional.isEmpty()) {
+            throw new NotFoundException("Ticket Not Found");
+        }
+        Ticket ticket = ticketOptional.get();
+        if (!ticket.getEvent().getId().equals(eventId)) {
+            throw new ValidationException("Ticket does not belong to the specified event");
+        }
+        if (ticket.getTicketStatus() != TicketStatus.AVAILABLE && (ticket.getTicketStatus() != TicketStatus.RESERVED ||
+                ticket.getExpirationDate() == null ||
+                ticket.getExpirationDate().isBefore(LocalDateTime.now()))) {
+            throw new InvalidActionException("Ticket is not available for reservation");
+        }
+        ticket.setTicketStatus(TicketStatus.RESERVED);
+        ticket.setExpirationDate(LocalDateTime.now().plusMinutes(ticketExpirationDurationMinutes));
+        ticketRepository.save(ticket);
+        messageProducer.sendMessage("ticket-reserved",
+                "Ticket with ID: " + ticketId + " reserved for user: " + userId);
+        return Optional.of("Ticket reserved successfully");
     }
 }
