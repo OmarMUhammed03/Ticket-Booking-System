@@ -9,7 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.commonexception.ValidationException;
+import org.example.commonlibrary.ValidationException;
 import org.example.authservice.model.AuthUser;
 import org.example.authservice.model.RefreshToken;
 import org.example.authservice.repository.AuthUserRepository;

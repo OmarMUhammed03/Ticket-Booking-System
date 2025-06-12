@@ -8,7 +8,21 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>booking-service</artifactId>
+    <packaging>jar</packaging>
+    <name>booking-service</name>
+    <description>Booking service</description>
+
+    <properties>
+        <java.version>23</java.version>
+        <jjwt.version>0.12.6</jjwt.version>
+        <lombok.version>1.18.32</lombok.version>
+    </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>common-library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>

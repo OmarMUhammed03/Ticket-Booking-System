@@ -1,4 +1,4 @@
-package org.example.commonexception;
+package org.example.commonlibrary;
 
 import io.micrometer.common.lang.NonNull;
 import org.springframework.http.HttpHeaders;

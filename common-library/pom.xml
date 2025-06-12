@@ -10,9 +10,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>common-exception</artifactId>
+    <artifactId>common-library</artifactId>
     <packaging>jar</packaging>
-    <name>common-exception</name>
+    <name>common-library</name>
     <description>Common exception handling module for Ticket Booking System</description>
 
     <dependencies>

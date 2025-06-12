@@ -1,9 +1,9 @@
 package org.example.eventservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.commonexception.InvalidActionException;
-import org.example.commonexception.NotFoundException;
-import org.example.commonexception.ValidationException;
+import org.example.commonlibrary.InvalidActionException;
+import org.example.commonlibrary.NotFoundException;
+import org.example.commonlibrary.ValidationException;
 import org.example.eventservice.dto.AddTicketsDto;
 import org.example.eventservice.dto.CreateEventDto;
 import org.example.eventservice.dto.EventResponseDto;

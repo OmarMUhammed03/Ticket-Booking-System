@@ -6,7 +6,7 @@ import org.example.eventservice.dto.VenueResponseDto;
 import org.example.eventservice.mapper.VenueMapper;
 import org.example.eventservice.model.Venue;
 import org.example.eventservice.repository.VenueRepository;
-import org.example.commonexception.NotFoundException;
+import org.example.commonlibrary.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

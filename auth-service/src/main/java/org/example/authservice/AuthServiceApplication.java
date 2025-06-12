@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = {
         "org.example.authservice",
-        "org.example.commonexception"
+        "org.example.commonlibrary"
 })
 public class AuthServiceApplication {
     public static void main(String[] args) {

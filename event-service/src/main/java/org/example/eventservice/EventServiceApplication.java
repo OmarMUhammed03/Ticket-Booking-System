@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 )
 @ComponentScan(basePackages = {
         "org.example.eventservice",
-        "org.example.commonexception"
+        "org.example.commonlibrary"
 })
 
 public class EventServiceApplication {

@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>org.example</groupId>
-            <artifactId>common-exception</artifactId>
+            <artifactId>common-library</artifactId>
             <version>${project.version}</version>
         </dependency>
 

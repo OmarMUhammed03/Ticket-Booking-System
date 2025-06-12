@@ -41,7 +41,7 @@
     <modules>
         <module>auth-service</module>
         <module>user-service</module>
-        <module>common-exception</module>
+        <module>common-library</module>
         <module>event-service</module>
         <module>booking-service</module>
         <module>payment-service</module>

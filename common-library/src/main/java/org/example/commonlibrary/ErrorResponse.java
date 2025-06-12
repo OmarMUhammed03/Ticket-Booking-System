@@ -1,4 +1,4 @@
-package org.example.commonexception;
+package org.example.commonlibrary;
 
 public class ErrorResponse {
     private int status;
