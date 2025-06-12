@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID bookingId;
+    private UUID id;
 
     @Column(nullable = false)
     private UUID userId;
