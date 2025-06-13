@@ -41,6 +41,5 @@ public class EventResponseDto {
         private String ticketType;
         private String ticketStatus;
         private LocalDateTime expirationDate;
-        private String seatNumber;
     }
 }
