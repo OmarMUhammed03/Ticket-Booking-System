@@ -7,7 +7,7 @@ import org.example.commonlibrary.ValidationException;
 import org.example.eventservice.dto.AddTicketsDto;
 import org.example.eventservice.dto.CreateEventDto;
 import org.example.eventservice.dto.EventResponseDto;
-import org.example.eventservice.kafka.MessageProducer;
+import org.example.commonlibrary.kafka.MessageProducer;
 import org.example.eventservice.model.*;
 import org.example.eventservice.mapper.EventMapper;
 import org.example.eventservice.repository.EventRepository;
@@ -118,7 +118,25 @@ public class EventService {
         return Optional.of(ticketDtos);
     }
 
+    private boolean availableTicket(Ticket ticket) {
+        return ticket.getTicketStatus() == TicketStatus.AVAILABLE ||
+                (ticket.getTicketStatus() == TicketStatus.RESERVED &&
+                        ticket.getExpirationDate() != null &&
+                        ticket.getExpirationDate().isAfter(LocalDateTime.now()));
+    }
+
     public Optional<String> reserveEventTicket(UUID eventId, UUID ticketId, String userId) {
+        isTicketAvailable(eventId, ticketId);
+        Ticket ticket = ticketRepository.findById(ticketId).get();
+        ticket.setTicketStatus(TicketStatus.RESERVED);
+        ticket.setExpirationDate(LocalDateTime.now().plusMinutes(ticketExpirationDurationMinutes));
+        ticketRepository.save(ticket);
+        messageProducer.sendMessage("ticket-reserved",
+                "Ticket with ID: " + ticketId + " reserved for user: " + userId);
+        return Optional.of("Ticket reserved successfully");
+    }
+
+    public Optional<Boolean> isTicketAvailable(UUID eventId, UUID ticketId) {
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new NotFoundException("Event Not Found");
@@ -131,16 +149,9 @@ public class EventService {
         if (!ticket.getEvent().getId().equals(eventId)) {
             throw new ValidationException("Ticket does not belong to the specified event");
         }
-        if (ticket.getTicketStatus() != TicketStatus.AVAILABLE && (ticket.getTicketStatus() != TicketStatus.RESERVED ||
-                ticket.getExpirationDate() == null ||
-                ticket.getExpirationDate().isBefore(LocalDateTime.now()))) {
+        if (!availableTicket(ticket)) {
             throw new InvalidActionException("Ticket is not available for reservation");
         }
-        ticket.setTicketStatus(TicketStatus.RESERVED);
-        ticket.setExpirationDate(LocalDateTime.now().plusMinutes(ticketExpirationDurationMinutes));
-        ticketRepository.save(ticket);
-        messageProducer.sendMessage("ticket-reserved",
-                "Ticket with ID: " + ticketId + " reserved for user: " + userId);
-        return Optional.of("Ticket reserved successfully");
+        return Optional.of(true);
     }
 }

@@ -83,4 +83,14 @@ public class EventController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{id}/tickets/{ticketId}/available")
+    public ResponseEntity<Boolean> isTicketAvailable(@PathVariable("id") UUID eventId,
+                                                @PathVariable("ticketId") UUID ticketId) {
+        LOGGER.info("Checking the availability of the ticket with ID: {} for event with ID: {}", ticketId, eventId);
+        Optional<Boolean> updatedTicket =
+                eventService.isTicketAvailable(eventId, ticketId);
+        return updatedTicket.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 }
