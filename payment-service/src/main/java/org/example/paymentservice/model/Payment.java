@@ -15,8 +15,6 @@ public class Payment {
     private UUID paymentId;
     @Column(nullable = false, unique = true)
     private UUID bookingId;
-    @Column(nullable = false)
-    private BigDecimal amount;
     private LocalDateTime paymentDate;
 }
 
