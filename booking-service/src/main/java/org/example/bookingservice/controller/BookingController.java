@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.bookingservice.dto.BookingRequestDto;
 import org.example.bookingservice.dto.BookingResponseDto;
 import org.example.bookingservice.service.BookingService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +19,9 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponseDto> createBooking(@RequestBody BookingRequestDto bookingRequestDto,
-                                                            @RequestHeader("X-User-Id") UUID userId) {
-        BookingResponseDto created = bookingService.createBooking(bookingRequestDto, userId);
+                                                            @RequestHeader("X-User-Id") UUID userId,
+                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        BookingResponseDto created = bookingService.createBooking(bookingRequestDto, userId, authorization);
         return ResponseEntity.ok(created);
     }
 

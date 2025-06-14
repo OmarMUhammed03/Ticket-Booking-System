@@ -2,6 +2,9 @@ package org.example.bookingservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.bookingservice.model.BookingStatus;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.example.bookingservice.dto.BookingRequestDto;
@@ -25,17 +28,23 @@ import static org.example.bookingservice.model.BookingStatus.PENDING;
 public class BookingService {
     private final BookingRepository bookingRepository;
     private final MessageProducer messageProducer;
-    private static final String EVENT_SERVICE_URL = "http://localhost:8082/api/events/";
+    private static final String GATEWAY_URL = "http://localhost:8088/api/events/";
     private static final int TICKET_EXPIRATION_DURATION_MINUTES = 10;
     private static final HashMap<UUID, LocalDateTime> ticketLastReserved = new HashMap<>();
 
-    public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto, UUID userId) {
+    public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto, UUID userId, String authHeader) {
         if (bookingRequestDto.getEventId() == null || bookingRequestDto.getTicketId() == null) {
             throw new ValidationException("Event ID and Ticket ID must not be null");
         }
         RestTemplate restTemplate = new RestTemplate();
-        String ticketAvailableUrl = EVENT_SERVICE_URL + bookingRequestDto.getEventId() + "/tickets/" + bookingRequestDto.getTicketId() + "/available";
-        ResponseEntity<Boolean> response = restTemplate.getForEntity(ticketAvailableUrl, Boolean.class);
+        String ticketAvailableUrl = GATEWAY_URL + bookingRequestDto.getEventId() + "/tickets/" + bookingRequestDto.getTicketId() + "/available";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, authHeader);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<Boolean> response = restTemplate.exchange(ticketAvailableUrl,
+                HttpMethod.GET,
+                requestEntity,
+                Boolean.class);
         if (Boolean.FALSE.equals(response.getBody())) {
             throw new ValidationException("Ticket is not available");
         }
