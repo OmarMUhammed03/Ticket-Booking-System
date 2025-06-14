@@ -2,6 +2,8 @@ package org.example.bookingservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.bookingservice.model.BookingStatus;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,7 +32,7 @@ public class BookingService {
     private final MessageProducer messageProducer;
     private static final String GATEWAY_URL = "http://localhost:8088/api/events/";
     private static final int TICKET_EXPIRATION_DURATION_MINUTES = 10;
-    private static final HashMap<UUID, LocalDateTime> ticketLastReserved = new HashMap<>();
+    private final CacheManager cacheManager;
 
     public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto, UUID userId, String authHeader) {
         if (bookingRequestDto.getEventId() == null || bookingRequestDto.getTicketId() == null) {
@@ -48,11 +50,9 @@ public class BookingService {
         if (Boolean.FALSE.equals(response.getBody())) {
             throw new ValidationException("Ticket is not available");
         }
-        if (ticketLastReserved.containsKey(bookingRequestDto.getTicketId())) {
-            LocalDateTime lastReserved = ticketLastReserved.get(bookingRequestDto.getTicketId());
-            if (lastReserved.isAfter(LocalDateTime.now().minusMinutes(TICKET_EXPIRATION_DURATION_MINUTES))) {
-                throw new ValidationException("Ticket is already reserved, please try again later");
-            }
+        Cache ticketReservationCache = cacheManager.getCache("ticketReservations");
+        if (ticketReservationCache != null && ticketReservationCache.get(bookingRequestDto.getTicketId()) != null) {
+            throw new ValidationException("Ticket is already reserved, please try again later");
         }
         bookingRequestDto.setBookingDate(LocalDateTime.now());
         bookingRequestDto.setBookingStatus(String.valueOf(PENDING));
@@ -62,7 +62,7 @@ public class BookingService {
                 Map.of("ticketId", bookingRequestDto.getTicketId(), "eventId", bookingRequestDto.getEventId()
                         , "userId", userId, "bookingId", created.getId())
         ));
-        ticketLastReserved.put(bookingRequestDto.getTicketId(), LocalDateTime.now());
+        ticketReservationCache.put(bookingRequestDto.getTicketId(), true);
         return BookingMapper.toBookingResponseDto(created);
     }
 
