@@ -10,11 +10,7 @@ import org.springframework.context.annotation.FilterType;
 
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 @ComponentScan(
-        basePackages = {"org.example.authservice", "org.example.commonlibrary"},
-        excludeFilters = @ComponentScan.Filter(
-                type = FilterType.ASSIGNABLE_TYPE,
-                classes = {KafkaConsumerConfig.class, KafkaProducerConfig.class}
-        )
+        basePackages = {"org.example.authservice", "org.example.commonlibrary"}
 )
 public class AuthServiceApplication {
     public static void main(String[] args) {
