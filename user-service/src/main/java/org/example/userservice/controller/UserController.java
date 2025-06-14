@@ -30,12 +30,6 @@ public class UserController {
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody CreateUserDto dto) {
-        Optional<UserResponseDto> user = userService.createUser(dto);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<UserResponseDto> deleteUser(@PathVariable("id") UUID userId) {
         Optional<UserResponseDto> user = userService.deleteUser(userId);
