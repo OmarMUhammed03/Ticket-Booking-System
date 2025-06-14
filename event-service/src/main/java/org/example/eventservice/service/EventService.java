@@ -16,10 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -124,16 +122,7 @@ public class EventService {
                         ticket.getExpirationDate().isAfter(LocalDateTime.now()));
     }
 
-    public Optional<String> reserveEventTicket(UUID eventId, UUID ticketId, String userId) {
-        isTicketAvailable(eventId, ticketId);
-        Ticket ticket = ticketRepository.findById(ticketId).get();
-        ticket.setTicketStatus(TicketStatus.RESERVED);
-        ticket.setExpirationDate(LocalDateTime.now().plusMinutes(ticketExpirationDurationMinutes));
-        ticketRepository.save(ticket);
-        return Optional.of("Ticket reserved successfully");
-    }
-
-    public Optional<Boolean> isTicketAvailable(UUID eventId, UUID ticketId) {
+    private void validTicket(UUID eventId, UUID ticketId) {
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new NotFoundException("Event Not Found");
@@ -146,9 +135,44 @@ public class EventService {
         if (!ticket.getEvent().getId().equals(eventId)) {
             throw new ValidationException("Ticket does not belong to the specified event");
         }
+    }
+
+    public Optional<String> reserveEventTicket(UUID eventId, UUID ticketId, String userId) {
+        isTicketAvailable(eventId, ticketId);
+        Ticket ticket = ticketRepository.findById(ticketId).get();
+        ticket.setTicketStatus(TicketStatus.RESERVED);
+        ticket.setExpirationDate(LocalDateTime.now().plusMinutes(ticketExpirationDurationMinutes));
+        ticketRepository.save(ticket);
+        return Optional.of("Ticket reserved successfully");
+    }
+
+    public Optional<Boolean> isTicketAvailable(UUID eventId, UUID ticketId) {
+        validTicket(eventId, ticketId);
+        Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
+        Ticket ticket = ticketOptional.get();
         if (!availableTicket(ticket)) {
             throw new InvalidActionException("Ticket is not available for reservation");
         }
         return Optional.of(true);
+    }
+
+    public List<EventResponseDto> getEventsByIds(List<UUID> eventIds) {
+        List<Event> events = eventRepository.findAllById(eventIds);
+        Set<UUID> foundIds = events.stream().map(Event::getId).collect(Collectors.toSet());
+        Set<UUID> missingIds = new HashSet<>(eventIds);
+        missingIds.removeAll(foundIds);
+        if (!missingIds.isEmpty()) {
+            throw new NotFoundException("Events not found for IDs: " + missingIds);
+        }
+        return events.stream()
+                .map(EventMapper::toDto)
+                .toList();
+    }
+
+    public Optional<EventResponseDto.TicketResponseDto> getTicketById(UUID eventId, UUID ticketId) {
+        validTicket(eventId, ticketId);
+        Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
+        Ticket ticket = ticketOptional.get();
+        return Optional.of(EventMapper.mapTicketToDto(ticket));
     }
 }

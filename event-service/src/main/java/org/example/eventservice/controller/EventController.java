@@ -63,6 +63,14 @@ public class EventController {
         return event.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    @GetMapping("/{id}/tickets/{ticketId}")
+    public ResponseEntity<EventResponseDto.TicketResponseDto> getTicketById(@PathVariable("id") UUID eventId,
+                                           @PathVariable("ticketId") UUID ticketId) {
+        LOGGER.info("Fetching ticket with ID: {} for event with ID: {}", ticketId, eventId);
+        Optional<EventResponseDto.TicketResponseDto> ticket = eventService.getTicketById(eventId, ticketId);
+        return ticket.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/{id}/tickets")
     public ResponseEntity<?> getTicketsForEvent(@PathVariable("id") UUID eventId) {
@@ -92,5 +100,10 @@ public class EventController {
         return updatedTicket.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
+    @GetMapping(params = "ids")
+    public ResponseEntity<List<EventResponseDto>> getEventsByIds(@RequestParam("ids") List<UUID> eventIds) {
+        LOGGER.info("Fetching events with IDs: {}", eventIds);
+        List<EventResponseDto> events = eventService.getEventsByIds(eventIds);
+        return ResponseEntity.ok(events);
+    }
 }
