@@ -22,14 +22,13 @@ public class MessageConsumer {
     private final MessageProducer messageProducer;
 
     @KafkaListener(topics = "reserve-ticket", groupId = "${spring.kafka.consumer.group-id}")
-    public void reserveTicket(Object message) throws JsonProcessingException {
-        LOGGER.info("Received message='{}'", message);
+    public void reserveTicket(String messageString) throws JsonProcessingException {
+        LOGGER.info("Received message='{}'", messageString);
         ObjectMapper mapper = new ObjectMapper();
-        String messageString = (String) message;
-        HashMap<String, UUID> messageMap = mapper.readValue(messageString, HashMap.class);
-        eventService.reserveEventTicket(messageMap.get("eventId"),
-                messageMap.get("ticketId"),
-                messageMap.get("userId").toString());
+        HashMap<String, String> messageMap = mapper.readValue(messageString, HashMap.class);
+        eventService.reserveEventTicket(UUID.fromString(messageMap.get("eventId")),
+                UUID.fromString(messageMap.get("ticketId")),
+                messageMap.get("userId"));
         LOGGER.info("Ticket reserved successfully for eventId={}, ticketId={}, userId={}",
                 messageMap.get("eventId"),
                 messageMap.get("ticketId"),
