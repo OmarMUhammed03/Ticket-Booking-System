@@ -23,4 +23,8 @@ public class CreateUserDto {
     @NotNull
     private String gender;
     private String profilePictureUrl;
+
+    public CreateUserDto() {
+
+    }
 }
