@@ -27,5 +27,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql
+  redis_cache:
+    image: redis:7.4.3
+    container_name: redisCache
+    ports:
+      - "6379:6379"
 volumes:
   postgres_data:
