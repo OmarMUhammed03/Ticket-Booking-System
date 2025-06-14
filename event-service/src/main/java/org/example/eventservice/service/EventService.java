@@ -7,7 +7,6 @@ import org.example.commonlibrary.ValidationException;
 import org.example.eventservice.dto.AddTicketsDto;
 import org.example.eventservice.dto.CreateEventDto;
 import org.example.eventservice.dto.EventResponseDto;
-import org.example.commonlibrary.kafka.MessageProducer;
 import org.example.eventservice.model.*;
 import org.example.eventservice.mapper.EventMapper;
 import org.example.eventservice.repository.EventRepository;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,7 +27,6 @@ public class EventService {
     private final EventRepository eventRepository;
     private final TicketRepository ticketRepository;
     private final VenueRepository venueRepository;
-    private final MessageProducer messageProducer;
 
     @Value("${ticket.expiration.duration.minutes}")
     private Integer ticketExpirationDurationMinutes;
@@ -131,8 +130,6 @@ public class EventService {
         ticket.setTicketStatus(TicketStatus.RESERVED);
         ticket.setExpirationDate(LocalDateTime.now().plusMinutes(ticketExpirationDurationMinutes));
         ticketRepository.save(ticket);
-        messageProducer.sendMessage("ticket-reserved",
-                "Ticket with ID: " + ticketId + " reserved for user: " + userId);
         return Optional.of("Ticket reserved successfully");
     }
 
