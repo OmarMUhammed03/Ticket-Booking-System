@@ -11,6 +11,7 @@ import org.example.commonlibrary.ValidationException;
 import org.example.authservice.model.AuthUser;
 import org.example.authservice.model.ROLE;
 import org.example.authservice.repository.AuthUserRepository;
+import org.example.commonlibrary.kafka.MessageProducer;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class AuthService {
     private final JwtService tokenService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final MessageProducer messageProducer;
 
     private final String[] roles = {
             ROLE.ADMIN.toString(),
@@ -63,6 +67,12 @@ public class AuthService {
             throw new ValidationException("Invalid role provided.");
         }
 
+        if (signupRequest.getRole().equals("ADMIN")) {
+            AuthUser currentUser = getCurrentUserDetails();
+            if (!currentUser.getRole().equals(ROLE.ADMIN)) {
+                throw new InvalidActionException("Only admin can register another admin.");
+            }
+        }
 
         AuthUser user = AuthUser.builder()
                 .email(signupRequest.getEmail())
@@ -71,7 +81,17 @@ public class AuthService {
                                 signupRequest.getPassword()))
                 .role(ROLE.valueOf(signupRequest.getRole()))
                 .build();
-        authUserRepository.save(user);
+
+        AuthUser savedUser = authUserRepository.save(user);
+
+        messageProducer.sendMessage("user-created", new HashMap<>(Map.of(
+                "id", savedUser.getId().toString(),
+                "email", user.getEmail(),
+                "firstname", signupRequest.getFirstname(),
+                "lastname", signupRequest.getLastname(),
+                "dateOfBirth", signupRequest.getDateOfBirth().toString(),
+                "gender", signupRequest.getGender()
+        )));
     }
 
     private String getCookieValue(HttpServletRequest request, String cookieName) {
