@@ -36,4 +36,10 @@ public class UserController {
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<UserResponseDto> getCurrentUser(@RequestHeader("X-User-Id") UUID userId) {
+        Optional<UserResponseDto> user = userService.getUserById(userId);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }
