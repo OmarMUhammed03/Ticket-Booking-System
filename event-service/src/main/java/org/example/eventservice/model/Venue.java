@@ -59,7 +59,6 @@ public class Venue {
     @OneToMany(
             mappedBy = "venue",
             cascade = CascadeType.ALL,
-            orphanRemoval = true,
             fetch = FetchType.LAZY
     )
     private List<Event> events = new ArrayList<>();
