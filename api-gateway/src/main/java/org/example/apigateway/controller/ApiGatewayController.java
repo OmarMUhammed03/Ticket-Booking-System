@@ -16,8 +16,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/my-account")
 public class ApiGatewayController {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final String GATEWAY_URL = "http://localhost:8088/api";
+
+    public ApiGatewayController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @GetMapping("/booking-history")
     public List<UserBookingResponseDto> getBookingHistory(
