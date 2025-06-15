@@ -1,12 +1,9 @@
 package org.example.authservice;
 
-import org.example.commonlibrary.config.KafkaConsumerConfig;
-import org.example.commonlibrary.config.KafkaProducerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 @ComponentScan(
