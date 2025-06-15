@@ -31,14 +31,13 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final MessageProducer messageProducer;
     private static final String GATEWAY_URL = "http://localhost:8088/api/events/";
-    private static final int TICKET_EXPIRATION_DURATION_MINUTES = 10;
     private final CacheManager cacheManager;
+    private final RestTemplate restTemplate;
 
     public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto, UUID userId, String authHeader) {
         if (bookingRequestDto.getEventId() == null || bookingRequestDto.getTicketId() == null) {
             throw new ValidationException("Event ID and Ticket ID must not be null");
         }
-        RestTemplate restTemplate = new RestTemplate();
         String ticketAvailableUrl = GATEWAY_URL + bookingRequestDto.getEventId() + "/tickets/" + bookingRequestDto.getTicketId() + "/available";
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, authHeader);
@@ -103,7 +102,7 @@ public class BookingService {
     }
 
     public List<BookingResponseDto> getBookingsByUserId(UUID userId, UUID requestUserId, String userRole) {
-        if (userId == requestUserId || userRole.equals("ADMIN")) {
+        if (userId.equals(requestUserId) || userRole.equals("ADMIN")) {
             return getBookingsByUserId(userId);
         }
         throw new InvalidActionException("Unauthorized access to bookings of another user");
