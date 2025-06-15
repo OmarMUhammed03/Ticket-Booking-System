@@ -1,4 +1,4 @@
-package org.example.eventservice;
+package org.example.eventservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.eventservice.dto.CreateEventDto;
