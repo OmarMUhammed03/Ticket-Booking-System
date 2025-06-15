@@ -23,9 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final AuthUserRepository repository;
     @Bean
-    public org.springframework.security.core.userdetails.UserDetailsService userDetailsService() {
+    public org.springframework.security.core.userdetails.UserDetailsService userDetailsService(final AuthUserRepository repository) {
         return new org.springframework.security.core.userdetails.UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String email) {
