@@ -63,5 +63,18 @@ public class AuthUser implements UserDetails {
     public String getPassword() {
         return this.password;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AuthUser authUser = (AuthUser) o;
+        return id != null && id.equals(authUser.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
 
