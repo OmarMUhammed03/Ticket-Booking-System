@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/my-account")
-public class apiGatewayController {
+public class ApiGatewayController {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String GATEWAY_URL = "http://localhost:8088/api";
