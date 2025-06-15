@@ -1,8 +1,21 @@
 package org.example.userservice.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record UserResponseDto(UUID id, String email, String firstName, String lastName, LocalDate dateOfBirth,
-                              String profilePictureUrl, String gender) {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserResponseDto {
+    private UUID id;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private LocalDate dateOfBirth;
+    private String profilePictureUrl;
+    private String gender;
 }
