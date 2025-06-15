@@ -24,6 +24,5 @@ public class Booking {
     private UUID ticketId;
     private BookingStatus bookingStatus;
     private LocalDateTime bookingDate;
-    @Lob
     private String bookingDetail;
 }
