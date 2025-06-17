@@ -1,5 +1,7 @@
 package org.example.authservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Authentication Controller", description = "Endpoints for user authentication and authorization")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
@@ -23,6 +26,7 @@ public class AuthController {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(AuthController.class);
 
+    @Operation(summary = "User Login", description = "Authenticates a user and returns access and refresh tokens.")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody final LoginRequest loginRequest,
@@ -34,6 +38,7 @@ public class AuthController {
         return ResponseEntity.ok(tokens);
     }
 
+    @Operation(summary = "User Registration", description = "Registers a new user account.")
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(
             @Valid @RequestBody final SignupRequest signupRequest) {
@@ -43,6 +48,7 @@ public class AuthController {
                 HttpStatus.CREATED);
     }
 
+    @Operation(summary = "User Logout", description = "Logs out the current user.")
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(final HttpServletRequest request, final HttpServletResponse response) {
         authenticationService.logoutUser(request, response);
