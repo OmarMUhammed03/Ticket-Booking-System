@@ -1,5 +1,7 @@
 package org.example.bookingservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.bookingservice.dto.BookingRequestDto;
 import org.example.bookingservice.dto.BookingResponseDto;
@@ -11,12 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Booking Controller", description = "Endpoints for managing bookings")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
     private final BookingService bookingService;
 
+    @Operation(summary = "Create a new booking", description = "Creates a new booking record based on the provided request data.")
     @PostMapping
     public ResponseEntity<BookingResponseDto> createBooking(@RequestBody BookingRequestDto bookingRequestDto,
                                                             @RequestHeader("X-User-Id") UUID userId,
@@ -25,6 +29,7 @@ public class BookingController {
         return ResponseEntity.ok(created);
     }
 
+    @Operation(summary = "Get booking by ID", description = "Retrieves a booking record by its unique identifier.")
     @GetMapping("/{id}")
     public ResponseEntity<BookingResponseDto> getBookingById(@PathVariable UUID id) {
         return bookingService.getBookingById(id)
@@ -32,11 +37,13 @@ public class BookingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Get all bookings", description = "Fetches all booking records.")
     @GetMapping
     public ResponseEntity<List<BookingResponseDto>> getAllBookings() {
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
+    @Operation(summary = "Update a booking", description = "Updates an existing booking record identified by its unique ID.")
     @PutMapping("/{id}")
     public ResponseEntity<BookingResponseDto> updateBooking(@PathVariable UUID id,
                                                             @RequestBody BookingRequestDto bookingRequestDto,
@@ -46,6 +53,7 @@ public class BookingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Delete a booking", description = "Deletes a booking record by its unique identifier.")
     @DeleteMapping("/{id}")
     public ResponseEntity<BookingResponseDto> deleteBooking(@PathVariable UUID id) {
         return bookingService.deleteBooking(id)
