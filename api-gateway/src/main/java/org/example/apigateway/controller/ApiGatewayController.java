@@ -1,5 +1,7 @@
 package org.example.apigateway.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.apigateway.dto.*;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/my-account")
+@Tag(name = "API Gateway Controller", description = "Endpoints for managing API Gateway operations")
 public class ApiGatewayController {
 
     private final RestTemplate restTemplate;
@@ -23,6 +26,7 @@ public class ApiGatewayController {
         this.restTemplate = restTemplate;
     }
 
+    @Operation(summary = "Get booking history", description = "Fetches the booking history for the current user.")
     @GetMapping("/booking-history")
     public List<UserBookingResponseDto> getBookingHistory(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
