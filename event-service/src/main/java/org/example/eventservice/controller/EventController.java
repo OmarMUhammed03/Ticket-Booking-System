@@ -1,5 +1,7 @@
 package org.example.eventservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.eventservice.dto.AddTicketsDto;
 import org.example.eventservice.dto.CreateEventDto;
 import org.example.eventservice.dto.EventResponseDto;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/events")
+@Tag(name = "Event Controller", description = "Endpoints for managing events")
 public class EventController {
     private final EventService eventService;
     private static final Logger LOGGER =
@@ -24,12 +27,14 @@ public class EventController {
         this.eventService = eventService;
     }
 
+    @Operation(summary = "Get all events", description = "Fetches all event records.")
     @GetMapping
     public ResponseEntity<List<EventResponseDto>> getAllEvents() {
         LOGGER.info("Fetching all events");
         return ResponseEntity.ok(eventService.getAllEvents());
     }
 
+    @Operation(summary = "Get event by ID", description = "Retrieves an event record by its unique identifier.")
     @GetMapping("/{id}")
     public ResponseEntity<EventResponseDto> getEventById(@PathVariable("id") UUID eventId) {
         LOGGER.info("Fetching event with ID: {}", eventId);
@@ -37,6 +42,7 @@ public class EventController {
         return event.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Create a new event", description = "Creates a new event record based on the provided request data.")
     @PostMapping
     public ResponseEntity<EventResponseDto> createEvent(@RequestBody CreateEventDto dto,
                                                         @RequestHeader("X-User-Id") UUID userId,
@@ -46,6 +52,7 @@ public class EventController {
         return event.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
+    @Operation(summary = "Delete an event", description = "Deletes an event record by its unique identifier.")
     @DeleteMapping("/{id}")
     public ResponseEntity<EventResponseDto> deleteEvent(@PathVariable("id") UUID eventId) {
         LOGGER.info("Deleting event with ID: {}", eventId);
