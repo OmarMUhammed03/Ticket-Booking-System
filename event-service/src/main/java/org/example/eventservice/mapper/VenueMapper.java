@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VenueMapper {
-    public VenueResponseDto toDto(Venue venue) {
+    public VenueResponseDto toDto(final Venue venue) {
         return new VenueResponseDto(
                 venue.getVenueId(),
                 venue.getName(),
@@ -21,7 +21,7 @@ public class VenueMapper {
         );
     }
 
-    public Venue toEntity(CreateVenueDto dto) {
+    public Venue toEntity(final CreateVenueDto dto) {
         return Venue.builder()
                 .name(dto.getName())
                 .address(dto.getAddress())

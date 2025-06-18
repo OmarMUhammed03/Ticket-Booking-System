@@ -1,6 +1,15 @@
 package org.example.eventservice.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -19,6 +28,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SuppressWarnings("checkstyle:MagicNumber")
 public class Venue {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -63,7 +73,7 @@ public class Venue {
     )
     private List<Event> events = new ArrayList<>();
 
-    public void addEvent(Event event) {
+    public void addEvent(final Event event) {
         events.add(event);
     }
 }

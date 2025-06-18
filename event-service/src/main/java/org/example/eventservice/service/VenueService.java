@@ -24,19 +24,19 @@ public class VenueService {
                 .toList();
     }
 
-    public VenueResponseDto getVenueById(UUID id) {
+    public VenueResponseDto getVenueById(final UUID id) {
         Venue venue = venueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Venue not found"));
         return venueMapper.toDto(venue);
     }
 
-    public VenueResponseDto createVenue(CreateVenueDto dto) {
+    public VenueResponseDto createVenue(final CreateVenueDto dto) {
         Venue venue = venueMapper.toEntity(dto);
         Venue saved = venueRepository.save(venue);
         return venueMapper.toDto(saved);
     }
 
-    public VenueResponseDto updateVenue(UUID id, CreateVenueDto dto) {
+    public VenueResponseDto updateVenue(final UUID id, final CreateVenueDto dto) {
         Venue existingVenue = venueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Venue not found"));
         Venue updatedVenue = venueMapper.toEntity(dto);
@@ -45,7 +45,7 @@ public class VenueService {
         return venueMapper.toDto(saved);
     }
 
-    public VenueResponseDto deleteVenue(UUID id) {
+    public VenueResponseDto deleteVenue(final UUID id) {
         Venue venue = venueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Venue not found"));
         venueRepository.delete(venue);
