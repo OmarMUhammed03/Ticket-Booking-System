@@ -5,7 +5,7 @@ public class ErrorResponse {
     private String message;
     private long timestamp;
 
-    public ErrorResponse(int status, String message, long timestamp) {
+    public ErrorResponse(final int status, final String message, final long timestamp) {
         this.status = status;
         this.message = message;
         this.timestamp = timestamp;
@@ -15,7 +15,7 @@ public class ErrorResponse {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(final int status) {
         this.status = status;
     }
 
@@ -23,7 +23,7 @@ public class ErrorResponse {
         return message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(final String message) {
         this.message = message;
     }
 
