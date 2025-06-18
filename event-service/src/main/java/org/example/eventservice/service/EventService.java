@@ -7,7 +7,10 @@ import org.example.commonlibrary.ValidationException;
 import org.example.eventservice.dto.AddTicketsDto;
 import org.example.eventservice.dto.CreateEventDto;
 import org.example.eventservice.dto.EventResponseDto;
-import org.example.eventservice.model.*;
+import org.example.eventservice.model.Venue;
+import org.example.eventservice.model.Event;
+import org.example.eventservice.model.Ticket;
+import org.example.eventservice.model.TicketStatus;
 import org.example.eventservice.mapper.EventMapper;
 import org.example.eventservice.repository.EventRepository;
 import org.example.eventservice.repository.TicketRepository;
@@ -16,7 +19,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.UUID;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -35,7 +42,7 @@ public class EventService {
                 .toList();
     }
 
-    public Optional<EventResponseDto> getEventById(UUID id) {
+    public Optional<EventResponseDto> getEventById(final UUID id) {
         Optional<Event> event = eventRepository.findById(id);
         if (event.isEmpty()) {
             throw new NotFoundException("Event Not Found");
@@ -43,7 +50,8 @@ public class EventService {
         return Optional.of(EventMapper.toDto(event.get()));
     }
 
-    public Optional<EventResponseDto> createEvent(CreateEventDto dto, UUID creatorId, String userRole) {
+    public Optional<EventResponseDto> createEvent(final CreateEventDto dto, final UUID creatorId,
+                                                  final String userRole) {
         if (userRole == null || (!userRole.equals("ADMIN") && !userRole.equals("ORGANIZER"))) {
             throw new InvalidActionException("Only admins and organizers can create events");
         }
@@ -60,7 +68,7 @@ public class EventService {
         return Optional.of(EventMapper.toDto(savedEvent));
     }
 
-    public Optional<EventResponseDto> deleteEvent(UUID id) {
+    public Optional<EventResponseDto> deleteEvent(final UUID id) {
         Optional<Event> eventOptional = eventRepository.findById(id);
         if (eventOptional.isPresent()) {
             Event event = eventOptional.get();
@@ -70,7 +78,7 @@ public class EventService {
         throw new NotFoundException("Event Not Found");
     }
 
-    public Optional<Integer> createTicketsForEvent(UUID eventId, String userRole, AddTicketsDto dto) {
+    public Optional<Integer> createTicketsForEvent(final UUID eventId, final String userRole, final AddTicketsDto dto) {
         if (userRole == null || (!userRole.equals("ADMIN") && !userRole.equals("ORGANIZER"))) {
             throw new InvalidActionException("Only admins or organizers can create tickets for events");
         }
@@ -100,29 +108,28 @@ public class EventService {
         return Optional.of(dto.getQuantity());
     }
 
-    public Optional<List<EventResponseDto.TicketResponseDto>> getTicketsForEvent(UUID eventId) {
+    public Optional<List<EventResponseDto.TicketResponseDto>> getTicketsForEvent(final UUID eventId) {
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new NotFoundException("Event Not Found");
         }
         Event event = eventOptional.get();
         List<EventResponseDto.TicketResponseDto> ticketDtos = event.getTickets()
-                .stream().filter(t -> (t.getTicketStatus() == TicketStatus.AVAILABLE ||
-                        (t.getTicketStatus() == TicketStatus.RESERVED && t.getExpirationDate() != null
+                .stream().filter(t -> (t.getTicketStatus() == TicketStatus.AVAILABLE
+                        || (t.getTicketStatus() == TicketStatus.RESERVED && t.getExpirationDate() != null
                                 && t.getExpirationDate().isAfter(LocalDateTime.now()))))
                 .map(EventMapper::mapTicketToDto)
                 .toList();
         return Optional.of(ticketDtos);
     }
 
-    private boolean availableTicket(Ticket ticket) {
-        return ticket.getTicketStatus() == TicketStatus.AVAILABLE ||
-                (ticket.getTicketStatus() == TicketStatus.RESERVED &&
-                        ticket.getExpirationDate() != null &&
-                        ticket.getExpirationDate().isAfter(LocalDateTime.now()));
+    private boolean availableTicket(final Ticket ticket) {
+        return ticket.getTicketStatus() == TicketStatus.AVAILABLE
+                || (ticket.getTicketStatus() == TicketStatus.RESERVED
+                && ticket.getExpirationDate() != null && ticket.getExpirationDate().isAfter(LocalDateTime.now()));
     }
 
-    private void validTicket(UUID eventId, UUID ticketId) {
+    private void validTicket(final UUID eventId, final UUID ticketId) {
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new NotFoundException("Event Not Found");
@@ -137,7 +144,7 @@ public class EventService {
         }
     }
 
-    public Optional<String> reserveEventTicket(UUID eventId, UUID ticketId, String userId) {
+    public Optional<String> reserveEventTicket(final UUID eventId, final UUID ticketId, final String userId) {
         isTicketAvailable(eventId, ticketId);
         Ticket ticket = ticketRepository.findById(ticketId).get();
         ticket.setTicketStatus(TicketStatus.RESERVED);
@@ -146,7 +153,7 @@ public class EventService {
         return Optional.of("Ticket reserved successfully");
     }
 
-    public Optional<Boolean> isTicketAvailable(UUID eventId, UUID ticketId) {
+    public Optional<Boolean> isTicketAvailable(final UUID eventId, final UUID ticketId) {
         validTicket(eventId, ticketId);
         Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
         Ticket ticket = ticketOptional.get();
@@ -156,7 +163,7 @@ public class EventService {
         return Optional.of(true);
     }
 
-    public List<EventResponseDto> getEventsByIds(List<UUID> eventIds) {
+    public List<EventResponseDto> getEventsByIds(final List<UUID> eventIds) {
         List<Event> events = eventRepository.findAllById(eventIds);
         Set<UUID> foundIds = events.stream().map(Event::getId).collect(Collectors.toSet());
         Set<UUID> missingIds = new HashSet<>(eventIds);
@@ -169,7 +176,7 @@ public class EventService {
                 .toList();
     }
 
-    public Optional<EventResponseDto.TicketResponseDto> getTicketById(UUID eventId, UUID ticketId) {
+    public Optional<EventResponseDto.TicketResponseDto> getTicketById(final UUID eventId, final UUID ticketId) {
         validTicket(eventId, ticketId);
         Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
         Ticket ticket = ticketOptional.get();

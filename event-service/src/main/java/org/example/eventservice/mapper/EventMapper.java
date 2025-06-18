@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Component
 public class EventMapper {
 
-    public static EventResponseDto toDto(Event event) {
+    public static EventResponseDto toDto(final Event event) {
         EventResponseDto dto = new EventResponseDto();
         dto.setId(event.getId());
         dto.setName(event.getName());
@@ -45,7 +45,7 @@ public class EventMapper {
         return dto;
     }
 
-    public static EventResponseDto.TicketResponseDto mapTicketToDto(Ticket t) {
+    public static EventResponseDto.TicketResponseDto mapTicketToDto(final Ticket t) {
         EventResponseDto.TicketResponseDto tDto = new EventResponseDto.TicketResponseDto();
         tDto.setTicketId(t.getTicketId());
         tDto.setPrice(t.getPrice());
@@ -54,7 +54,7 @@ public class EventMapper {
         return tDto;
     }
 
-    public static Event toEntity(CreateEventDto dto, UUID creatorId, Venue venue) {
+    public static Event toEntity(final CreateEventDto dto, final UUID creatorId, final Venue venue) {
         Event event = new Event();
 
         event.setName(dto.getName());
