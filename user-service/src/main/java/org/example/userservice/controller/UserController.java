@@ -5,7 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.userservice.dto.UserResponseDto;
 import org.example.userservice.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +22,7 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(final UserService userService) {
         this.userService = userService;
     }
 
@@ -29,14 +34,14 @@ public class UserController {
 
     @Operation(summary = "Get user by ID", description = "Retrieves a user record by its unique identifier.")
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") UUID userId) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable("id") final UUID userId) {
         Optional<UserResponseDto> user = userService.getUserById(userId);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Delete a user", description = "Deletes a user record by its unique identifier.")
     @DeleteMapping("/{id}")
-    public ResponseEntity<UserResponseDto> deleteUser(@PathVariable("id") UUID userId) {
+    public ResponseEntity<UserResponseDto> deleteUser(@PathVariable("id") final UUID userId) {
         Optional<UserResponseDto> user = userService.deleteUser(userId);
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -44,7 +49,7 @@ public class UserController {
 
     @Operation(summary = "Get current user", description = "Retrieves the current user based on the provided header.")
     @GetMapping("/current-user")
-    public ResponseEntity<UserResponseDto> getCurrentUser(@RequestHeader("X-User-Id") UUID userId) {
+    public ResponseEntity<UserResponseDto> getCurrentUser(@RequestHeader("X-User-Id") final UUID userId) {
         Optional<UserResponseDto> user = userService.getUserById(userId);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }

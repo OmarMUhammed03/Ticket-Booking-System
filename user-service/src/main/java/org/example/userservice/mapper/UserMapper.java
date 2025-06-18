@@ -5,7 +5,7 @@ import org.example.userservice.dto.UserResponseDto;
 import org.example.userservice.model.User;
 
 public class UserMapper {
-    public static UserResponseDto toUserCreatedDto(User user) {
+    public static UserResponseDto toUserCreatedDto(final User user) {
         return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
@@ -17,7 +17,7 @@ public class UserMapper {
         );
     }
 
-    public static User toUser(CreateUserDto dto) {
+    public static User toUser(final CreateUserDto dto) {
         User user = new User();
         user.setId(dto.getId());
         user.setEmail(dto.getEmail());

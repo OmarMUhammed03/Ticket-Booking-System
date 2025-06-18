@@ -1,6 +1,9 @@
 package org.example.userservice.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -21,8 +24,7 @@ public class User {
     private String profilePictureUrl;
 
     public boolean isValid() {
-        return id != null &&
-                email != null && !email.isBlank()
+        return id != null && email != null && !email.isBlank()
                 && firstname != null && !firstname.isBlank()
                 && lastname != null && !lastname.isBlank()
                 && dateOfBirth != null

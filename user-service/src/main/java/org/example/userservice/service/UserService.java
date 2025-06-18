@@ -15,7 +15,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(final UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -25,7 +25,7 @@ public class UserService {
                 .toList();
     }
 
-    public Optional<UserResponseDto> createUser(CreateUserDto createUserDto) {
+    public Optional<UserResponseDto> createUser(final CreateUserDto createUserDto) {
         User user = UserMapper.toUser(createUserDto);
         if (!user.isValid()) {
             return Optional.empty();
@@ -34,12 +34,12 @@ public class UserService {
         return Optional.of(UserMapper.toUserCreatedDto(user));
     }
 
-    public Optional<UserResponseDto> getUserById(UUID userId) {
+    public Optional<UserResponseDto> getUserById(final UUID userId) {
         return userRepository.findById(userId)
                 .map(UserMapper::toUserCreatedDto);
     }
 
-    public Optional<UserResponseDto> deleteUser(UUID userId) {
+    public Optional<UserResponseDto> deleteUser(final UUID userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
             userRepository.deleteById(userId);
