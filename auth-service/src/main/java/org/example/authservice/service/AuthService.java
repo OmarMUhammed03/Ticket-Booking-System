@@ -94,7 +94,7 @@ public class AuthService {
         )));
     }
 
-    private String getCookieValue(HttpServletRequest request, String cookieName) {
+    private String getCookieValue(final HttpServletRequest request, final String cookieName) {
         if (request.getCookies() == null) {
             return null;
         }

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
         basePackages = {"org.example.authservice", "org.example.commonlibrary"}
 )
 public class AuthServiceApplication {
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         SpringApplication.run(AuthServiceApplication.class, args);
     }
 }

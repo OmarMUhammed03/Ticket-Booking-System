@@ -45,11 +45,11 @@ public class JwtService {
             "/api/auth/refresh-token";
     private static final String ACCESS_TOKEN_COOKIE_PATH = "/";
 
-    public String extractEmail(Claims claims) {
+    public String extractEmail(final Claims claims) {
         return claims.getSubject();
     }
 
-    public String generateToken(String username) {
+    public String generateToken(final String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -144,7 +144,7 @@ public class JwtService {
     }
 
     public void removeRefreshTokenFromCookieAndExpire(
-            final HttpServletResponse response, String token) {
+            final HttpServletResponse response, final String token) {
         Claims claims = validateAccessToken(token);
         String userEmail = extractEmail(claims);
         AuthUser user =
@@ -174,16 +174,16 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean isTokenValid(String token, String email) {
+    public boolean isTokenValid(final String token, final String email) {
         final String tokenEmail = extractEmail(validateAccessToken(token));
         return (tokenEmail.equals(email)) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(final String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    private Date extractExpiration(final String token) {
         return validateAccessToken(token).getExpiration();
     }
 }
