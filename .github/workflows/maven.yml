@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Microservices CI/CD
+name: Microservices CI
 
 on:
   push:
@@ -45,13 +45,13 @@ jobs:
               - 'user-service/**'
 
   # This job will run in parallel for each service identified in the previous job.
-  build-and-publish:
-    name: Build & Publish ${{ matrix.service }}
+  build-and-test:
+    name: Build & Test ${{ matrix.service }}
     needs: determine-changes
     # Only run this job if the 'determine-changes' job found changed services
     if: ${{ needs.determine-changes.outputs.services != '[]' }}
     runs-on: ubuntu-latest
-    
+
     strategy:
       fail-fast: false
       # The 'matrix' is dynamically created from the JSON array output of the previous job
@@ -61,6 +61,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Start Docker Services
+        uses: isbang/compose-action@v1.5.1
+        with:
+          compose-file: "./docker-compose.yml"
+          wait-for-healthy: "true"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -81,26 +87,3 @@ jobs:
 
       - name: Build and run tests for ${{ matrix.service }}
         run: mvn -B verify --file ./${{ matrix.service }}/pom.xml
-
-      - name: Log in to Docker Hub
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Docker image for ${{ matrix.service }}
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-        uses: docker/build-push-action@v5
-        with:
-          context: ./${{ matrix.service }}
-          dockerfile: ./${{ matrix.service }}/Dockerfile
-          push: true
-          # The image tag is also created dynamically
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
