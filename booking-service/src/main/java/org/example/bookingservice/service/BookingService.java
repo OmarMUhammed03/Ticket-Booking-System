@@ -20,7 +20,11 @@ import org.example.commonlibrary.kafka.MessageProducer;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.example.bookingservice.model.BookingStatus.PENDING;
@@ -34,11 +38,13 @@ public class BookingService {
     private final CacheManager cacheManager;
     private final RestTemplate restTemplate;
 
-    public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto, UUID userId, String authHeader) {
+    public BookingResponseDto createBooking(final BookingRequestDto bookingRequestDto, final UUID userId,
+                                            final String authHeader) {
         if (bookingRequestDto.getEventId() == null || bookingRequestDto.getTicketId() == null) {
             throw new ValidationException("Event ID and Ticket ID must not be null");
         }
-        String ticketAvailableUrl = GATEWAY_URL + bookingRequestDto.getEventId() + "/tickets/" + bookingRequestDto.getTicketId() + "/available";
+        String ticketAvailableUrl = GATEWAY_URL + bookingRequestDto.getEventId() + "/tickets/"
+                + bookingRequestDto.getTicketId() + "/available";
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, authHeader);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
@@ -58,35 +64,41 @@ public class BookingService {
         Booking booking = BookingMapper.toBooking(bookingRequestDto, userId);
         Booking created = bookingRepository.save(booking);
         messageProducer.sendMessage("reserve-ticket", "ticket-available", new HashMap<>(
-                Map.of("ticketId", bookingRequestDto.getTicketId(), "eventId", bookingRequestDto.getEventId()
-                        , "userId", userId, "bookingId", created.getId())
+                Map.of("ticketId", bookingRequestDto.getTicketId(), "eventId", bookingRequestDto.getEventId(),
+                        "userId", userId, "bookingId", created.getId())
         ));
         ticketReservationCache.put(bookingRequestDto.getTicketId(), true);
         return BookingMapper.toBookingResponseDto(created);
     }
 
-    public Optional<BookingResponseDto> getBookingById(UUID id) {
+    public Optional<BookingResponseDto> getBookingById(final UUID id) {
         return bookingRepository.findById(id).map(BookingMapper::toBookingResponseDto);
     }
 
     public List<BookingResponseDto> getAllBookings() {
-        return bookingRepository.findAll().stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
+        return bookingRepository.findAll().stream().map(BookingMapper::toBookingResponseDto)
+                .collect(Collectors.toList());
     }
 
-    public Optional<BookingResponseDto> updateBooking(UUID id, BookingRequestDto bookingRequestDto, UUID userId) {
+    public Optional<BookingResponseDto> updateBooking(final UUID id, final BookingRequestDto bookingRequestDto,
+                                                      final UUID userId) {
         return bookingRepository.findById(id).map(existing -> {
             Booking updatedBooking = BookingMapper.toBooking(bookingRequestDto, userId);
-            if (bookingRequestDto.getBookingStatus() != null)
+            if (bookingRequestDto.getBookingStatus() != null) {
                 existing.setBookingStatus(updatedBooking.getBookingStatus());
-            if (bookingRequestDto.getBookingDate() != null) existing.setBookingDate(updatedBooking.getBookingDate());
-            if (bookingRequestDto.getBookingDetail() != null)
+            }
+            if (bookingRequestDto.getBookingDate() != null) {
+                existing.setBookingDate(updatedBooking.getBookingDate());
+            }
+            if (bookingRequestDto.getBookingDetail() != null) {
                 existing.setBookingDetail(updatedBooking.getBookingDetail());
+            }
             Booking saved = bookingRepository.save(existing);
             return BookingMapper.toBookingResponseDto(saved);
         });
     }
 
-    public Optional<BookingResponseDto> updateBookingStatus(UUID id, String status) {
+    public Optional<BookingResponseDto> updateBookingStatus(final UUID id, final String status) {
         return bookingRepository.findById(id).map(existing -> {
             existing.setBookingStatus(BookingStatus.valueOf(status));
             Booking saved = bookingRepository.save(existing);
@@ -94,21 +106,23 @@ public class BookingService {
         });
     }
 
-    public Optional<BookingResponseDto> deleteBooking(UUID id) {
+    public Optional<BookingResponseDto> deleteBooking(final UUID id) {
         return bookingRepository.findById(id).map(existing -> {
             bookingRepository.deleteById(id);
             return BookingMapper.toBookingResponseDto(existing);
         });
     }
 
-    public List<BookingResponseDto> getBookingsByUserId(UUID userId, UUID requestUserId, String userRole) {
+    public List<BookingResponseDto> getBookingsByUserId(final UUID userId, final UUID requestUserId,
+                                                        final String userRole) {
         if (userId.equals(requestUserId) || userRole.equals("ADMIN")) {
             return getBookingsByUserId(userId);
         }
         throw new InvalidActionException("Unauthorized access to bookings of another user");
     }
 
-    public List<BookingResponseDto> getBookingsByUserId(UUID userId) {
-        return bookingRepository.findByUserId(userId).stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
+    public List<BookingResponseDto> getBookingsByUserId(final UUID userId) {
+        return bookingRepository.findByUserId(userId).stream()
+                .map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
     }
 }

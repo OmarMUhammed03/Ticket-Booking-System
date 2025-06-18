@@ -16,34 +16,34 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Component
 public class MessageConsumer {
-    private final Logger LOGGER = LoggerFactory.getLogger(MessageConsumer.class);
+    private final Logger logger = LoggerFactory.getLogger(MessageConsumer.class);
     private final BookingService bookingService;
     private final MessageProducer producer;
 
     @KafkaListener(topics = "ticket-reserved", groupId = "${spring.kafka.consumer.group-id}")
-    public void updateBookingStatus(String messageString) throws JsonProcessingException {
-        LOGGER.info("Received message='{}'", messageString);
+    public void updateBookingStatus(final String messageString) throws JsonProcessingException {
+        logger.info("Received message='{}'", messageString);
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String, String> messageMap = mapper.readValue(messageString, HashMap.class);
         bookingService.updateBookingStatus(UUID.fromString(messageMap.get("bookingId")), "WAITING_FOR_PAYMENT");
-        LOGGER.info("Booking status updated to WAITING_FOR_PAYMENT for bookingId={}", messageMap.get("bookingId"));
+        logger.info("Booking status updated to WAITING_FOR_PAYMENT for bookingId={}", messageMap.get("bookingId"));
     }
 
     @KafkaListener(topics = "booking-failed", groupId = "${spring.kafka.consumer.group-id}")
-    public void failBooking(String messageString) throws JsonProcessingException {
-        LOGGER.info("Received message='{}'", messageString);
+    public void failBooking(final String messageString) throws JsonProcessingException {
+        logger.info("Received message='{}'", messageString);
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String, String> messageMap = mapper.readValue(messageString, HashMap.class);
         bookingService.updateBookingStatus(UUID.fromString(messageMap.get("bookingId")), "CANCELLED");
-        LOGGER.info("Booking failed for bookingId={}", messageMap.get("bookingId"));
+        logger.info("Booking failed for bookingId={}", messageMap.get("bookingId"));
     }
 
     @KafkaListener(topics = "payment-success", groupId = "${spring.kafka.consumer.group-id}")
-    public void completeBooking(String messageString) throws JsonProcessingException {
-        LOGGER.info("Received message='{}'", messageString);
+    public void completeBooking(final String messageString) throws JsonProcessingException {
+        logger.info("Received message='{}'", messageString);
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String, String> messageMap = mapper.readValue(messageString, HashMap.class);
         bookingService.updateBookingStatus(UUID.fromString(messageMap.get("bookingId")), "CONFIRMED");
-        LOGGER.info("Booking confirmed for bookingId={}", messageMap.get("bookingId"));
+        logger.info("Booking confirmed for bookingId={}", messageMap.get("bookingId"));
     }
 }

@@ -8,7 +8,7 @@ import org.example.bookingservice.model.BookingStatus;
 import java.util.UUID;
 
 public class BookingMapper {
-    public static Booking toBooking(BookingRequestDto dto, UUID userId) {
+    public static Booking toBooking(final BookingRequestDto dto, final UUID userId) {
         Booking booking = new Booking();
         booking.setUserId(userId);
         booking.setEventId(dto.getEventId());
@@ -19,7 +19,7 @@ public class BookingMapper {
         return booking;
     }
 
-    public static BookingResponseDto toBookingResponseDto(Booking booking) {
+    public static BookingResponseDto toBookingResponseDto(final Booking booking) {
         BookingResponseDto dto = new BookingResponseDto();
         dto.setId(booking.getId());
         dto.setUserId(booking.getUserId());
