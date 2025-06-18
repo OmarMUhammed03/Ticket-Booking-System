@@ -1,0 +1,109 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Microservices CI/CD
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  # This first job determines which microservices have changed.
+  determine-changes:
+    name: Determine Changed Services
+    runs-on: ubuntu-latest
+    outputs:
+      # An output variable 'services' will be a JSON array of changed service names
+      services: ${{ steps.filter.outputs.changes }}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use paths-filter to find changed services
+        uses: dorny/paths-filter@v3.0.2
+        id: filter
+        with:
+          # Base the filter on the last commit on the branch
+          base: ${{ github.base_ref }}
+          # Define a filter key for each of your services
+          filters: |
+            api-gateway:
+              - 'api-gateway/**'
+            auth-service:
+              - 'auth-service/**'
+            event-service:
+              - 'event-service/**'
+            booking-service:
+              - 'booking-service/**'
+            payment-service:
+              - 'payment-service/**'
+            user-service:
+              - 'user-service/**'
+
+  # This job will run in parallel for each service identified in the previous job.
+  build-and-publish:
+    name: Build & Publish ${{ matrix.service }}
+    needs: determine-changes
+    # Only run this job if the 'determine-changes' job found changed services
+    if: ${{ needs.determine-changes.outputs.services != '[]' }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      # The 'matrix' is dynamically created from the JSON array output of the previous job
+      matrix:
+        service: ${{ fromJson(needs.determine-changes.outputs.services) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start shared services (DB, Kafka, etc.)
+        # This uses your single root docker-compose.yml for infrastructure
+        uses: isbang/compose-action@v1.5.1
+        with:
+          compose-file: "./docker-compose.yml"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and run tests for ${{ matrix.service }}
+        # The path to the pom.xml is created dynamically using the matrix variable
+        run: mvn -B verify --file ./${{ matrix.service }}/pom.xml
+
+      - name: Log in to Docker Hub
+        # This step only runs on a direct push to the 'dev' branch, not on pull requests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image for ${{ matrix.service }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        uses: docker/build-push-action@v5
+        with:
+          # The build context and Dockerfile path are created dynamically
+          context: ./${{ matrix.service }}
+          dockerfile: ./${{ matrix.service }}/Dockerfile
+          push: true
+          # The image tag is also created dynamically
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
