@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class PaymentMapper {
-    public static Payment toPayment(PaymentRequestDto dto) {
+    public static Payment toPayment(final PaymentRequestDto dto) {
         Payment payment = new Payment();
         payment.setPaymentId(UUID.randomUUID());
         payment.setBookingId(dto.getBookingId());
@@ -16,7 +16,7 @@ public class PaymentMapper {
         return payment;
     }
 
-    public static PaymentResponseDto toPaymentResponseDto(Payment payment) {
+    public static PaymentResponseDto toPaymentResponseDto(final Payment payment) {
         PaymentResponseDto dto = new PaymentResponseDto();
         dto.setPaymentId(payment.getPaymentId());
         dto.setBookingId(payment.getBookingId());
