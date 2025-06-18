@@ -7,7 +7,14 @@ import org.example.paymentservice.dto.PaymentRequestDto;
 import org.example.paymentservice.dto.PaymentResponseDto;
 import org.example.paymentservice.service.PaymentService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,15 +27,16 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    @Operation(summary = "Create a new payment", description = "Creates a new payment record based on the provided request data.")
-    public ResponseEntity<PaymentResponseDto> createPayment(@RequestBody PaymentRequestDto paymentRequestDto) {
+    @Operation(summary = "Create a new payment",
+            description = "Creates a new payment record based on the provided request data.")
+    public ResponseEntity<PaymentResponseDto> createPayment(@RequestBody final PaymentRequestDto paymentRequestDto) {
         PaymentResponseDto created = paymentService.createPayment(paymentRequestDto);
         return ResponseEntity.ok(created);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get payment by ID", description = "Retrieves a payment record by its unique identifier.")
-    public ResponseEntity<PaymentResponseDto> getPaymentById(@PathVariable UUID id) {
+    public ResponseEntity<PaymentResponseDto> getPaymentById(@PathVariable final UUID id) {
         return paymentService.getPaymentById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -41,8 +49,10 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update a payment", description = "Updates an existing payment record identified by its unique ID.")
-    public ResponseEntity<PaymentResponseDto> updatePayment(@PathVariable UUID id, @RequestBody PaymentRequestDto paymentRequestDto) {
+    @Operation(summary = "Update a payment",
+            description = "Updates an existing payment record identified by its unique ID.")
+    public ResponseEntity<PaymentResponseDto> updatePayment(@PathVariable final UUID id,
+                                                            @RequestBody final PaymentRequestDto paymentRequestDto) {
         return paymentService.updatePayment(id, paymentRequestDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -50,15 +60,16 @@ public class PaymentController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a payment", description = "Deletes a payment record by its unique identifier.")
-    public ResponseEntity<PaymentResponseDto> deletePayment(@PathVariable UUID id) {
+    public ResponseEntity<PaymentResponseDto> deletePayment(@PathVariable final UUID id) {
         return paymentService.deletePayment(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/booking/{bookingId}")
-    @Operation(summary = "Get payments by booking ID", description = "Retrieves all payment records associated with a specific booking ID.")
-    public ResponseEntity<List<PaymentResponseDto>> getPaymentsByBookingId(@PathVariable UUID bookingId) {
+    @Operation(summary = "Get payments by booking ID",
+            description = "Retrieves all payment records associated with a specific booking ID.")
+    public ResponseEntity<List<PaymentResponseDto>> getPaymentsByBookingId(@PathVariable final UUID bookingId) {
         return ResponseEntity.ok(paymentService.getPaymentsByBookingId(bookingId));
     }
 }

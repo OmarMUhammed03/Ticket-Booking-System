@@ -22,7 +22,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final MessageProducer messageProducer;
 
-    public PaymentResponseDto createPayment(PaymentRequestDto paymentRequestDto) {
+    public PaymentResponseDto createPayment(final PaymentRequestDto paymentRequestDto) {
         if (paymentRequestDto.getBookingId() == null || paymentRequestDto.getBookingId().toString().isEmpty()) {
             throw new ValidationException("Missing Fields");
         }
@@ -35,7 +35,7 @@ public class PaymentService {
         return PaymentMapper.toPaymentResponseDto(saved);
     }
 
-    public Optional<PaymentResponseDto> getPaymentById(UUID paymentId) {
+    public Optional<PaymentResponseDto> getPaymentById(final UUID paymentId) {
         return paymentRepository.findById(paymentId)
                 .map(PaymentMapper::toPaymentResponseDto);
     }
@@ -46,7 +46,7 @@ public class PaymentService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<PaymentResponseDto> updatePayment(UUID paymentId, PaymentRequestDto paymentRequestDto) {
+    public Optional<PaymentResponseDto> updatePayment(final UUID paymentId, final PaymentRequestDto paymentRequestDto) {
         return paymentRepository.findById(paymentId).map(existing -> {
             existing.setBookingId(paymentRequestDto.getBookingId());
             Payment saved = paymentRepository.save(existing);
@@ -54,14 +54,14 @@ public class PaymentService {
         });
     }
 
-    public Optional<PaymentResponseDto> deletePayment(UUID paymentId) {
+    public Optional<PaymentResponseDto> deletePayment(final UUID paymentId) {
         return paymentRepository.findById(paymentId).map(existing -> {
             paymentRepository.deleteById(paymentId);
             return PaymentMapper.toPaymentResponseDto(existing);
         });
     }
 
-    public List<PaymentResponseDto> getPaymentsByBookingId(UUID bookingId) {
+    public List<PaymentResponseDto> getPaymentsByBookingId(final UUID bookingId) {
         return paymentRepository.findByBookingId(bookingId).stream()
                 .map(PaymentMapper::toPaymentResponseDto)
                 .collect(Collectors.toList());
