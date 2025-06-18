@@ -15,14 +15,12 @@ on:
     branches: [ "dev" ]
 
 jobs:
-  # This first job determines which microservices have changed.
   determine-changes:
     name: Determine Changed Services
     runs-on: ubuntu-latest
     outputs:
-      # An output variable 'services' will be a JSON array of changed service names
       services: ${{ steps.filter.outputs.changes }}
-      
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,9 +29,7 @@ jobs:
         uses: dorny/paths-filter@v3.0.2
         id: filter
         with:
-          # Base the filter on the last commit on the branch
           base: ${{ github.base_ref }}
-          # Define a filter key for each of your services
           filters: |
             api-gateway:
               - 'api-gateway/**'
@@ -79,12 +75,13 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Enforce Code Style with Checkstyle
+        run: mvn checkstyle:check --file ./${{ matrix.service }}/pom.xml
+
       - name: Build and run tests for ${{ matrix.service }}
-        # The path to the pom.xml is created dynamically using the matrix variable
         run: mvn -B verify --file ./${{ matrix.service }}/pom.xml
 
       - name: Log in to Docker Hub
-        # This step only runs on a direct push to the 'dev' branch, not on pull requests
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
         uses: docker/login-action@v3
         with:
@@ -99,7 +96,6 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
         uses: docker/build-push-action@v5
         with:
-          # The build context and Dockerfile path are created dynamically
           context: ./${{ matrix.service }}
           dockerfile: ./${{ matrix.service }}/Dockerfile
           push: true
