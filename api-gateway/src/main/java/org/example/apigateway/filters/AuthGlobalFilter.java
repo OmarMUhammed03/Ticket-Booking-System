@@ -22,33 +22,34 @@ public class AuthGlobalFilter implements GlobalFilter {
 
     private final List<String> excludedPaths = List.of("/api/auth");
 
-    private static final Logger log = LoggerFactory.getLogger(AuthGlobalFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthGlobalFilter.class);
 
-    public AuthGlobalFilter(WebClient authWebClient) {
+    public AuthGlobalFilter(final WebClient authWebClient) {
         this.authWebClient = authWebClient;
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(final ServerWebExchange exchange, final GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
 
         boolean isExcluded = excludedPaths.stream().anyMatch(path::startsWith);
         if (isExcluded) {
-            log.debug("Path {} is excluded from authentication filter", path);
+            LOGGER.debug("Path {} is excluded from authentication filter", path);
             return chain.filter(exchange);
         }
 
-        log.debug("Applying authentication filter to path: {}", path);
+        LOGGER.debug("Applying authentication filter to path: {}", path);
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Authorization header is missing or invalid for path: {} with authHeader: {}", path, authHeader);
+            LOGGER.warn(
+                    "Authorization header is missing or invalid for path: {} with authHeader: {}", path, authHeader);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        log.debug("Authorization header found. Calling authentication service.");
+        LOGGER.debug("Authorization header found. Calling authentication service.");
 
         return authWebClient
                 .get()
@@ -57,21 +58,22 @@ public class AuthGlobalFilter implements GlobalFilter {
                 .retrieve()
                 .onStatus(status -> status != HttpStatus.OK,
                         resp -> {
-                            log.error("Authentication service returned non-OK status: {}. Headers: {}",
+                            LOGGER.error("Authentication service returned non-OK status: {}. Headers: {}",
                                     resp.statusCode(), resp.headers().asHttpHeaders());
                             return resp.bodyToMono(String.class)
-                                    .doOnNext(body -> log.error("Authentication service failed body: {}", body))
-                                    .then(Mono.error(new ValidationException("Authentication service rejected request")));
+                                    .doOnNext(body -> LOGGER.error("Authentication service failed body: {}", body))
+                                    .then(Mono.error(new
+                                            ValidationException("Authentication service rejected request")));
                         })
                 .toEntity(Void.class)
                 .flatMap(authResponseEntity -> {
-                    log.debug("Authentication service returned OK. Extracting headers.");
+                    LOGGER.debug("Authentication service returned OK. Extracting headers.");
                     HttpHeaders authHeaders = authResponseEntity.getHeaders();
                     String userRoles = authHeaders.getFirst("X-User-Roles");
                     String userEmail = authHeaders.getFirst("X-User-Email");
                     String userId = authHeaders.getFirst("X-User-Id");
 
-                    log.debug("Extracted headers - X-User-Roles: {}, X-User-Email: {}, X-User-Id: {}", userRoles,
+                    LOGGER.debug("Extracted headers - X-User-Roles: {}, X-User-Email: {}, X-User-Id: {}", userRoles,
                             userEmail, userId);
 
                     ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
@@ -90,11 +92,11 @@ public class AuthGlobalFilter implements GlobalFilter {
 
                     ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
 
-                    log.debug("Headers added to outgoing request. Continuing filter chain.");
+                    LOGGER.debug("Headers added to outgoing request. Continuing filter chain.");
                     return chain.filter(modifiedExchange);
                 })
                 .onErrorResume(err -> {
-                    log.error("Authentication failed due to an error: {}", err.getMessage());
+                    LOGGER.error("Authentication failed due to an error: {}", err.getMessage());
                     exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                     return exchange.getResponse().setComplete();
                 });

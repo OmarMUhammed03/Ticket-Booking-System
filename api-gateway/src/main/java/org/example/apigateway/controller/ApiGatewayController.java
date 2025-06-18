@@ -2,16 +2,28 @@ package org.example.apigateway.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.apigateway.dto.*;
+import org.example.apigateway.dto.BookingResponseDto;
+import org.example.apigateway.dto.EventResponseDto;
+import org.example.apigateway.dto.UserBookingResponseDto;
+import  org.example.apigateway.dto.UserResponseDto;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.UUID;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,18 +32,18 @@ import java.util.stream.Collectors;
 public class ApiGatewayController {
 
     private final RestTemplate restTemplate;
-    private final String GATEWAY_URL = "http://localhost:8088/api";
+    private final String gatewayUrl = "http://localhost:8088/api";
 
-    public ApiGatewayController(RestTemplate restTemplate) {
+    public ApiGatewayController(final RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     @Operation(summary = "Get booking history", description = "Fetches the booking history for the current user.")
     @GetMapping("/booking-history")
     public List<UserBookingResponseDto> getBookingHistory(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) final String authorization) {
 
-        String bookingServiceUrl = GATEWAY_URL + "/bookings/current-user";
+        String bookingServiceUrl = gatewayUrl + "/bookings/current-user";
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, authorization);
 
@@ -51,8 +63,8 @@ public class ApiGatewayController {
                 .map(BookingResponseDto::getEventId)
                 .distinct()
                 .toList();
-        String eventServiceUrl = GATEWAY_URL + "/events?ids=" +
-                eventIds.stream()
+        String eventServiceUrl = gatewayUrl + "/events?ids="
+                + eventIds.stream()
                         .map(UUID::toString)
                         .collect(Collectors.joining(","));
         ResponseEntity<List<EventResponseDto>> eventsResponse = restTemplate.exchange(
@@ -67,7 +79,7 @@ public class ApiGatewayController {
                 ? Map.of()
                 : events.stream().collect(Collectors.toMap(EventResponseDto::getId, e -> e));
 
-        String userServiceUrl = GATEWAY_URL + "/users/current-user";
+        String userServiceUrl = gatewayUrl + "/users/current-user";
         ResponseEntity<UserResponseDto> userResponse = restTemplate.exchange(
                 userServiceUrl,
                 HttpMethod.GET,
@@ -80,7 +92,7 @@ public class ApiGatewayController {
         for (BookingResponseDto booking : bookings) {
             EventResponseDto eventDto = eventById.get(booking.getEventId());
 
-            String ticketServiceUrl = GATEWAY_URL + "/events/" + eventDto.getId() + "/tickets/" + booking.getTicketId();
+            String ticketServiceUrl = gatewayUrl + "/events/" + eventDto.getId() + "/tickets/" + booking.getTicketId();
             ResponseEntity<EventResponseDto.TicketResponseDto> ticketResponse = restTemplate.exchange(
                     ticketServiceUrl,
                     HttpMethod.GET,
