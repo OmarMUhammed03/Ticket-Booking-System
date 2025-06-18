@@ -17,6 +17,7 @@ public class SignupRequest {
     private String firstname;
     @NotBlank
     private String lastname;
+    @SuppressWarnings("checkstyle:MagicNumber")
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;

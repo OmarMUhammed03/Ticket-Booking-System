@@ -26,10 +26,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     @Bean
-    public org.springframework.security.core.userdetails.UserDetailsService userDetailsService(final AuthUserRepository repository) {
+    public org.springframework.security.core.userdetails.UserDetailsService userDetailsService(final AuthUserRepository
+                                                                                                           repository) {
         return new org.springframework.security.core.userdetails.UserDetailsService() {
             @Override
-            public UserDetails loadUserByUsername(String email) {
+            public UserDetails loadUserByUsername(final String email) {
                 return repository.findByEmail(email)
                         .orElseThrow(() -> new NotFoundException("User not found"));
             }
@@ -37,7 +38,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
+    public SecurityFilterChain securityFilterChain(final HttpSecurity http, final JwtAuthenticationFilter
+            jwtAuthenticationFilter)
             throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
