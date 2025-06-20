@@ -229,12 +229,7 @@ mvn verify
 
 ## API Documentation
 
-The API documentation is available through Swagger UI at `/swagger-ui.html` when running any service. This provides:
-
-- Detailed endpoint documentation
-- Request/Response examples
-- Interactive API testing interface
-- Authentication requirements
+The API documentation is available through Swagger UI at `/swagger-ui/index.html` when running any service, don't forget to add /api before the route because it is the service context.
 
 ## Authentication
 
