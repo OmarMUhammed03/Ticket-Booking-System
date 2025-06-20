@@ -31,7 +31,7 @@ The system is composed of several key microservices that work together, supporte
 - **User Service**: Manages user profiles, registration, and user-related data. Handles user CRUD operations and provides user information to other services as needed.
 
 - **Auth Service**: Responsible for authentication and authorization. Issues and validates JWT tokens, manages login, registration, and user roles, and integrates with the API Gateway for secure access control.
-
+- **Distributed Caching with Redis**: To handle high-concurrency scenarios and prevent race conditions, the system uses a distributed cache (Redis) for temporary ticket reservations. When a user initiates a booking, the ticket is atomically checked and temporarily locked in the cache. This lock has a configured expiration time, ensuring that if the booking is not completed within a certain window (e.g., due to payment failure or user abandonment), the ticket is automatically released and made available to other users.
 - **`common-library`**: A shared Maven module that centralizes common logic and configuration across all microservices. This library includes:
 
     - **Global Exception Handling:** A centralized `@RestControllerAdvice` to ensure consistent error responses across all APIs.
@@ -272,6 +272,7 @@ To get started with the platform, you need to have Java 21, Maven, and Docker in
 - [Spring Data JPA Docs](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [Redis Documentation](https://redis.io/documentation)
 - [Docker Docs](https://docs.docker.com/)
 - [Docker Compose Docs](https://docs.docker.com/compose/)
 - [Maven Documentation](https://maven.apache.org/guides/index.html)
